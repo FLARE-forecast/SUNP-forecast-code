@@ -1,4 +1,4 @@
-par_names,par_names_save,par_file,par_init,par_init_lowerbound,par_init_upperbound,par_lowerbound,par_upperbound,perturb_par,par_units, fix_par
+par_names,par_names_save,par_file,par_init,par_init_lowerbound,par_init_upperbound,par_lowerbound,par_upperbound,perturb_par,par_units,fix_par
 sed_temp_mean,zone1temp,glm3.nml,12,5,15,-100,100,1.2,deg_C,0
 sed_temp_mean,zone2temp,glm3.nml,15,10,20,-100,100,1.5,deg_C,0
 sed_temp_mean,zone3temp,glm3.nml,15,10,20,-100,100,1.5,deg_C,0

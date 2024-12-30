@@ -122,6 +122,9 @@ measurement_methods:
     oxygen:
      - do_sensor
      - exo_sensor
+
+file_path:
+  data_directory: data_raw/sunp-buoy-data
 # NH4:
 #     - grab_sample
 # NO3NO2:

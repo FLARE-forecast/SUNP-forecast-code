@@ -69,7 +69,7 @@ model_settings:
                     8.0, 8.5, 9.0,
                     9.5, 10.0, 15.0,
                     20.0, 25.0, 30.0]
-   max_model_settings: 100
+   max_model_layers: 100
 
 
  # [0.0, 0.1, 0.33, 0.67,
