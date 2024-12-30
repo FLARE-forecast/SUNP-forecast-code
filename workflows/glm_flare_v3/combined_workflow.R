@@ -1,12 +1,16 @@
 library(tidyverse)
 library(lubridate)
+
+#remotes::install_github('flare-forecast/FLAREr@single-parameter')
+remotes::install_github('flare-forecast/FLAREr')
+remotes::install_github("rqthomas/GLM3r")
+Sys.setenv('GLM_PATH'='GLM3r')
+
 lake_directory <- here::here()
-print(lake_directory)
 setwd(lake_directory)
-forecast_site <- "sunp"
+forecast_site <- config$location$site_id
 configure_run_file <- "configure_run.yml"
-update_run_config <- TRUE
-config_set_name <- "default_temp_oxy"
+config_set_name <- "glm_flare_v3"
 
 Sys.setenv("AWS_DEFAULT_REGION" = "renc",
            "AWS_S3_ENDPOINT" = "osn.xsede.org",
@@ -14,29 +18,33 @@ Sys.setenv("AWS_DEFAULT_REGION" = "renc",
 
 #' Source the R files in the repository
 source(file.path(lake_directory, "R", "insitu_qaqc_withDO.R"))
+source(file.path(lake_directory, "R", "get_edi_file.R"))
+source(file.path(lake_directory, "R", "generate_forecast_score_arrow.R"))
 
 #' Generate the `config_obs` object and create directories if necessary
 
-config_obs <- FLAREr::initialize_obs_processing(lake_directory, config_set_name = config_set_name, observation_yml = "observation_processing.yml")
-config <- FLAREr::set_configuration(configure_run_file,lake_directory, config_set_name = config_set_name)
+config_obs <- yaml::read_yaml(file.path(lake_directory,'configuration',config_set_name,'observation_processing.yml'))
+configure_run_file <- "configure_run.yml"
+config <- FLAREr:::set_up_simulation(configure_run_file,lake_directory, config_set_name = config_set_name)
 
 #' Clone or pull from data repositories
 
-FLAREr::get_git_repo(lake_directory,
+FLAREr:::get_git_repo(lake_directory,
                      directory = config_obs$realtime_insitu_location,
                      git_repo = "https://github.com/FLARE-forecast/SUNP-data.git")
 
 #' Download files from EDI and Zenodo
 #'
 
-dir.create(file.path(config_obs$file_path$data_directory, "hist-data"),showWarnings = FALSE)
+#dir.create(file.path(config_obs$file_path$data_directory, "hist-data"),showWarnings = FALSE)
+dir.create(file.path(lake_directory, "targets", config_obs$site_id), showWarnings = FALSE)
 
 # high frequency buoy data
-FLAREr::get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/f4d3535cebd96715c872a7d3ca45c196",
+get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/f4d3535cebd96715c872a7d3ca45c196",
                      file = file.path("hist-data", "hist_buoy_do.csv"),
                      lake_directory)
 
-FLAREr::get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/1f903796efc8d79e263a549f8b5aa8a6",
+get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/1f903796efc8d79e263a549f8b5aa8a6",
                      file = file.path("hist-data", "hist_buoy_temp.csv"),
                      lake_directory)
 
@@ -55,13 +63,13 @@ if(!file.exists(file.path(lake_directory, 'data_raw', 'hist-data', 'LMP-v2023.1.
 #' Clean up insitu
 
 # QAQC insitu buoy data
-cleaned_insitu_file <- insitu_qaqc_withDO(realtime_file = file.path(config_obs$file_path$data_directory, config_obs$insitu_obs_fname[1]),
-                                   hist_buoy_file = c(file.path(config_obs$file_path$data_directory, config_obs$insitu_obs_fname[2]), file.path(config_obs$file_path$data_directory, config_obs$insitu_obs_fname[5])),
-                                   hist_manual_file = file.path(config_obs$file_path$data_directory, config_obs$insitu_obs_fname[3]),
-                                   hist_all_file =  file.path(config_obs$file_path$data_directory, config_obs$insitu_obs_fname[4]),
+cleaned_insitu_file <- insitu_qaqc_withDO(realtime_file = file.path('data_raw',config_obs$insitu_obs_fname[1]),
+                                   hist_buoy_file = c(file.path('data_raw',config_obs$insitu_obs_fname[2]), file.path('data_raw',config_obs$insitu_obs_fname[5])),
+                                   hist_manual_file = file.path('data_raw',config_obs$insitu_obs_fname[3]),
+                                   hist_all_file =  file.path('data_raw',config_obs$insitu_obs_fname[4]),
                                    maintenance_url = "https://docs.google.com/spreadsheets/d/1IfVUlxOjG85S55vhmrorzF5FQfpmCN2MROA_ttEEiws/edit?usp=sharing",
                                    variables = c("temperature", "oxygen"),
-                                   cleaned_insitu_file = file.path(config_obs$file_path$targets_directory, config_obs$site_id, paste0(config_obs$site_id,"-targets-insitu.csv")),
+                                   cleaned_insitu_file = file.path('targets', config_obs$site_id, paste0(config_obs$site_id,"-targets-insitu.csv")),
                                    config = config_obs,
                                    lake_directory = lake_directory)
 
@@ -69,7 +77,7 @@ cleaned_insitu_file <- insitu_qaqc_withDO(realtime_file = file.path(config_obs$f
 
 message("Successfully generated targets")
 
-FLAREr::put_targets(site_id = config_obs$site_id,
+FLAREr:::put_targets(site_id = config_obs$site_id,
                     cleaned_insitu_file,
                     use_s3 = config$run_config$use_s3,
                     config = config)
@@ -81,13 +89,57 @@ noaa_ready <- TRUE
 
 while(noaa_ready){
 
-  config <- FLAREr::set_configuration(configure_run_file,lake_directory, config_set_name = config_set_name)
-
-  print(config)
+  config <- FLAREr:::set_up_simulation(configure_run_file,lake_directory, config_set_name = config_set_name)
 
   output <- FLAREr::run_flare(lake_directory = lake_directory,
                               configure_run_file = configure_run_file,
                               config_set_name = config_set_name)
+
+
+  message("Scoring forecasts")
+  forecast_s3 <- arrow::s3_bucket(bucket = config$s3$forecasts_parquet$bucket, endpoint_override = config$s3$forecasts_parquet$endpoint, anonymous = TRUE)
+  forecast_df <- arrow::open_dataset(forecast_s3) |>
+    dplyr::mutate(reference_date = lubridate::as_date(reference_date)) |>
+    dplyr::filter(model_id == 'glm_flare_v3',
+                  site_id == forecast_site,
+                  reference_date == lubridate::as_datetime(config$run_config$forecast_start_datetime)) |>
+    dplyr::collect()
+
+  print(paste0('LENGTH OF FORECAST OUTPUT: ', nrow(forecast_df)))
+
+  if(config$output_settings$evaluate_past & config$run_config$use_s3){
+    #past_days <- lubridate::as_date(forecast_df$reference_datetime[1]) - lubridate::days(config$run_config$forecast_horizon)
+    past_days <- lubridate::as_date(lubridate::as_date(config$run_config$forecast_start_datetime) - lubridate::days(config$run_config$forecast_horizon))
+
+    #vars <- arrow_env_vars()
+    past_s3 <- arrow::s3_bucket(bucket = config$s3$forecasts_parquet$bucket, endpoint_override = config$s3$forecasts_parquet$endpoint, anonymous = TRUE)
+    past_forecasts <- arrow::open_dataset(past_s3) |>
+      dplyr::mutate(reference_date = lubridate::as_date(reference_date)) |>
+      dplyr::filter(model_id == 'glm_flare_v3',
+                    site_id == forecast_site,
+                    reference_date == past_days) |>
+      dplyr::collect()
+    #unset_arrow_vars(vars)
+  }else{
+    past_forecasts <- NULL
+  }
+
+  combined_forecasts <- dplyr::bind_rows(forecast_df, past_forecasts)
+
+  combined_forecasts$site_id <- forecast_site
+  combined_forecasts$model_id <- config$run_config$sim_name
+
+  targets_df <- read_csv(file.path(config$file_path$qaqc_data_directory,paste0(config$location$site_id, "-targets-insitu.csv")),show_col_types = FALSE)
+
+
+  scoring <- generate_forecast_score_arrow(targets_df = targets_df,
+                                           forecast_df = combined_forecasts, ## only works if dataframe returned from output
+                                           use_s3 = config$run_config$use_s3,
+                                           bucket = config$s3$scores$bucket,
+                                           endpoint = config$s3$scores$endpoint,
+                                           local_directory = './scores/sunp',
+                                           variable_types = c("state","parameter"))
+
 
 
   forecast_start_datetime <- lubridate::as_datetime(config$run_config$forecast_start_datetime) + lubridate::days(1)

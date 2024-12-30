@@ -93,7 +93,7 @@ insitu_qaqc_withDO <- function(realtime_file,
     temp <- field_midn[,c(1, i+1)]
     temp$Depth <- depths[i]
     colnames(temp) <- c('DateTime', 'Temp', 'Depth')
-    field_format <- full_join(temp, field_format)
+    field_format <- full_join(temp, field_format, by = c('DateTime', 'Temp', 'Depth'))
   }
 
 
@@ -249,7 +249,7 @@ insitu_qaqc_withDO <- function(realtime_file,
 
   for(i in 1:nrow(maint)){
 
-    print(i)
+    #print(i)
 
     # get start and end time of one maintenance event
     start <- maint$TIMESTAMP_start[i]
