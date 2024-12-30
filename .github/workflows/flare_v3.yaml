@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest #self-hosted
     container:
       image: rqthomas/flare-rocker:4.4
     steps:
