@@ -164,7 +164,7 @@ while(noaa_ready){
 
   #RCurl::url.exists(ping_url, timeout = 5)
 
-  noaa_ready <- FLAREr:::check_noaa_present_arrow(lake_directory,
+  noaa_ready <- FLAREr::check_noaa_present(lake_directory,
                                                   configure_run_file,
                                                   config_set_name = config_set_name)
 }
