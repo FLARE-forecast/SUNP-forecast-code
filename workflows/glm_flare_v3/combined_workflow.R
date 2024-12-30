@@ -8,7 +8,7 @@ Sys.setenv('GLM_PATH'='GLM3r')
 
 lake_directory <- here::here()
 setwd(lake_directory)
-forecast_site <- config$location$site_id
+forecast_site <- 'sunp'
 configure_run_file <- "configure_run.yml"
 config_set_name <- "glm_flare_v3"
 
