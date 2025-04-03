@@ -6,8 +6,8 @@ remotes::install_github('flare-forecast/FLAREr')
 remotes::install_github("rqthomas/GLM3r")
 Sys.setenv('GLM_PATH'='GLM3r')
 
-remotes::install_github("gagolews/stringi")
-library(stringi)
+#remotes::install_github("gagolews/stringi")
+#library(stringi)
 
 print('Done with package/credential set up')
 
