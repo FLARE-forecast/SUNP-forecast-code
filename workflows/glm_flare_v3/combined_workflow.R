@@ -23,12 +23,15 @@ source(file.path(lake_directory, "R", "insitu_qaqc_withDO.R"))
 source(file.path(lake_directory, "R", "get_edi_file.R"))
 source(file.path(lake_directory, "R", "generate_forecast_score_arrow.R"))
 
+print('done with sourcing')
+
 #' Generate the `config_obs` object and create directories if necessary
 
 config_obs <- yaml::read_yaml(file.path(lake_directory,'configuration',config_set_name,'observation_processing.yml'))
 configure_run_file <- "configure_run.yml"
 config <- FLAREr:::set_up_simulation(configure_run_file,lake_directory, config_set_name = config_set_name)
 
+print('done with configuration')
 #' Clone or pull from data repositories
 
 FLAREr:::get_git_repo(lake_directory,
