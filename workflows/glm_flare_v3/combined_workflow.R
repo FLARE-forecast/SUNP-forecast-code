@@ -6,6 +6,8 @@ remotes::install_github('flare-forecast/FLAREr')
 remotes::install_github("rqthomas/GLM3r")
 Sys.setenv('GLM_PATH'='GLM3r')
 
+print('Done with package/credential set up')
+
 lake_directory <- here::here()
 setwd(lake_directory)
 forecast_site <- 'sunp'
