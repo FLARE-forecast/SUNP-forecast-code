@@ -6,6 +6,11 @@ remotes::install_github('flare-forecast/FLAREr')
 remotes::install_github("rqthomas/GLM3r")
 Sys.setenv('GLM_PATH'='GLM3r')
 
+#remotes::install_github("gagolews/stringi")
+#library(stringi)
+
+print('Done with package/credential set up')
+
 lake_directory <- here::here()
 setwd(lake_directory)
 forecast_site <- 'sunp'
@@ -21,12 +26,16 @@ source(file.path(lake_directory, "R", "insitu_qaqc_withDO.R"))
 source(file.path(lake_directory, "R", "get_edi_file.R"))
 source(file.path(lake_directory, "R", "generate_forecast_score_arrow.R"))
 
+print('done with sourcing')
+
 #' Generate the `config_obs` object and create directories if necessary
 
 config_obs <- yaml::read_yaml(file.path(lake_directory,'configuration',config_set_name,'observation_processing.yml'))
+print('done with configuration 1')
 configure_run_file <- "configure_run.yml"
+print('done with configuration 2')
 config <- FLAREr:::set_up_simulation(configure_run_file,lake_directory, config_set_name = config_set_name)
-
+print('done with configuration 3')
 #' Clone or pull from data repositories
 
 FLAREr:::get_git_repo(lake_directory,
