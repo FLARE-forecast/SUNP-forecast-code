@@ -8,8 +8,8 @@ configure_run_file <- "configure_run.yml"
 update_run_config <- TRUE
 config_set_name <- "default_temp_oxy"
 
-Sys.setenv("AWS_DEFAULT_REGION" = "renc",
-           "AWS_S3_ENDPOINT" = "osn.xsede.org",
+Sys.setenv("AWS_DEFAULT_REGION" = "amnh1",
+           "AWS_S3_ENDPOINT" = "osn.mghpcc.org",
            "USE_HTTPS" = TRUE)
 
 #' Source the R files in the repository

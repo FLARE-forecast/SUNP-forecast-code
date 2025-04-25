@@ -61,7 +61,7 @@ noaa_date <- Sys.Date() - lubridate::days(2)
 #mc_ls(paste0("s3_store/",'bio230121-bucket01/flare/forecasts/parquet/site_id=sunp/model_id=glm_flare_v1/',paste0("reference_date=",forecast_date)))
 
 flare_forecast_s3 <- arrow::s3_bucket(file.path('bio230121-bucket01/flare/forecasts/parquet/site_id=sunp/model_id=glm_flare_v1',paste0("reference_date=",forecast_date)),
-                                    endpoint_override = 'renc.osn.xsede.org',
+                                    endpoint_override = 'amnh1.osn.mghpcc.org',
                                     anonymous = TRUE)
 
 flare_forecast_df <- arrow::open_dataset(flare_forecast_s3) |>
