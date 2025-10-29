@@ -313,20 +313,28 @@ insitu_qaqc_withDO <- function(realtime_file,
 
   # convert depth columns into long format
 
-  temp_format <- data.frame(matrix(ncol=length(variables) + 1), nrow = 0)
-  colnames(temp_format) <- c('DateTime', 'Depth', variables)
-  #temp_format$DateTime <- as.POSIXct(temp_format$DateTime)
+  # temp_format <- data.frame(matrix(ncol=length(variables) + 1), nrow = 0)
+  # colnames(temp_format) <- c('DateTime', 'Depth', variables)
+  # #temp_format$DateTime <- as.POSIXct(temp_format$DateTime)
+  #
+  #
+  # depths <- c('0.1', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10')
+  #
+  # for (i in 1:length(depths)) {
+  #   temp <- d[,c(1, i+5)]
+  #   #temp$DateTime <- as.POSIXct(temp$DateTime, tryFormats = c("%Y-%m-%d %T", "%Y-%m-%d"))
+  #   temp$Depth <- depths[i]
+  #   colnames(temp) <- c('DateTime', 'Temp', 'Depth')
+  #   temp_format <- dplyr::full_join(temp, temp_format)
+  # }
 
+  ## ABP edit to take out the temp columns and then pivot longer
 
-  depths <- c('0.1', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10')
-
-  for (i in 1:length(depths)) {
-    temp <- d[,c(1, i+5)]
-    #temp$DateTime <- as.POSIXct(temp$DateTime, tryFormats = c("%Y-%m-%d %T", "%Y-%m-%d"))
-    temp$Depth <- depths[i]
-    colnames(temp) <- c('DateTime', 'Temp', 'Depth')
-    temp_format <- dplyr::full_join(temp, temp_format)
-  }
+  temp_format <- d |>
+    select(TIMESTAMP, starts_with("wtr_")) |> # come back later and and the EXOs temp in and the DO sensors temp
+    pivot_longer(!TIMESTAMP, names_to = c("sensor", "Depth"), names_sep = "_", values_to = 'Temp')|>
+    mutate(Depth = ifelse(Depth == "surface", 0.1, Depth))|>
+    dplyr::rename("DateTime" = TIMESTAMP)
 
   # put depth as second column and sort by date and depth
   temp_format <- temp_format %>%
@@ -342,10 +350,11 @@ insitu_qaqc_withDO <- function(realtime_file,
   #                 DO_1 = doobs_1,
   #                 DO_10 = doobs)
 
+# Need to add in the mid DO and the deep EXO DO. Just going to continue with the surface and deep DO for now- ABP
   temp_oxy <- d %>%
-    dplyr::select(TIMESTAMP, doobs_mid, doobs_deep) %>%
+    dplyr::select(TIMESTAMP, EXO_doobs_shallow, doobs_deep) %>%
     dplyr::rename(DateTime = TIMESTAMP,
-                  DO_1 = doobs_mid,
+                  DO_1 = EXO_doobs_shallow,
                   DO_10 = doobs_deep)
 
   oxy_1 <- temp_oxy %>%
