@@ -367,6 +367,8 @@ insitu_qaqc_withDO <- function(realtime_file,
     dplyr::mutate(Depth = 10.0) %>%
     dplyr::rename(DO = DO_10)
 
+  
+  oxy_1$DO <- as.numeric(oxy_1$DO)
   oxy_10$DO <- as.numeric(oxy_10$DO)
 
   oxy_buoy <- dplyr::full_join(oxy_1, oxy_10) %>%
