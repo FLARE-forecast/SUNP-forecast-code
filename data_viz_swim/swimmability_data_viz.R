@@ -66,7 +66,7 @@ flare_forecast_s3 <- arrow::s3_bucket(file.path('bio230121-bucket01/flare/foreca
 
 flare_forecast_df <- arrow::open_dataset(flare_forecast_s3) |>
   filter(variable == 'temperature',
-         depth == 0.1) |>
+         depth == 1.0) |> #was set to 0.1m
   collect() |>
   filter(datetime < (forecast_date + lubridate::days(8))) |>
   mutate(date = as.Date(datetime),
