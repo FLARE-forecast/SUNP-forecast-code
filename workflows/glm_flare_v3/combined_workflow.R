@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 
+edi_access_key = Sys.getenv('EDI_ACCESS_KEY')
 #remotes::install_github('flare-forecast/FLAREr@single-parameter')
 #remotes::install_github('flare-forecast/FLAREr')
 remotes::install_github("rqthomas/GLM3r")
@@ -49,11 +50,11 @@ FLAREr:::get_git_repo(lake_directory,
 dir.create(file.path(lake_directory, "targets", config_obs$site_id), showWarnings = FALSE)
 
 # high frequency buoy data
-get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/f4d3535cebd96715c872a7d3ca45c196",
+get_edi_file(edi_https = paste0("https://pasta.lternet.edu/package/data/eml/edi/499/2/f4d3535cebd96715c872a7d3ca45c196?key=",edi_access_key),
                      file = file.path("hist-data", "hist_buoy_do.csv"),
                      lake_directory)
 
-get_edi_file(edi_https = "https://pasta.lternet.edu/package/data/eml/edi/499/2/1f903796efc8d79e263a549f8b5aa8a6",
+get_edi_file(edi_https = paste0("https://pasta.lternet.edu/package/data/eml/edi/499/2/1f903796efc8d79e263a549f8b5aa8a6?key=",edi_access_key),
                      file = file.path("hist-data", "hist_buoy_temp.csv"),
                      lake_directory)
 
