@@ -22,3 +22,9 @@ jobs:
           EDI_ACCESS_KEY: ${{ secrets.EDI_ACCESS_KEY }}
           GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         run:  Rscript $GITHUB_WORKSPACE/workflows/glm_flare_v3/combined_workflow.R
+
+      - name: Call Healthcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl
+          curl -m 10 --retry 5 https://hc-ping.com/9af38db8-d058-4e2c-9779-cd69891d9216
